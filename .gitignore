@@ -1,0 +1,11 @@
+# Don't track following content
+
+#directories
+/env/*
+*_pycache_/*
+
+
+#files
+*.txt
+*.json
+.idea/*
