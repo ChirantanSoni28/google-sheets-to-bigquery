@@ -50,8 +50,3 @@ class GoogleAuthentication:
         return service_object
 
 
-# scope = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']
-#
-# x = GoogleAuthentication("sheets", "v4", scope, "/Chirantan/Projects/google-sheets-to-bigquery",
-#                          "credentials.json").google_authorization_access()
-
