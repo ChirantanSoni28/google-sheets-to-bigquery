@@ -1,1 +1,1 @@
-# google-sheets-to-bigquery
+# Google Sheets to Bigquery Connector
