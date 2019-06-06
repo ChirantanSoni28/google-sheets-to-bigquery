@@ -1,6 +1,7 @@
 from google.oauth2 import service_account
 from google.cloud import bigquery
 from googleSheets.sheets_extract import sheetsClient
+import datetime
 
 
 
@@ -116,75 +117,81 @@ class bigQuery:
         return tables_schema
 
 
-    def loadData(self):
+    def loadData(self, table, schema):
 
 
-        table_list_ref = list(self.bqClient.list_tables(self.datasets[0].dataset_id))
+        for platform,data in self.dataframe.items():
 
-        tables_schema = bigQuery(self.projectId).getSchema()
+            if platform == 'Facebook Ads' and table == self.table_names[0]:
+                self.dataframe[platform].columns = schema
+                dataframe = self.dataframe[platform].astype(
+                    {"report_date": 'object', "campaign_name": 'object', "ad_set_name": 'object',
+                     "ad_name": 'object', "placement": 'object', "device_platform": 'object',
+                     "impressions": 'int64', "clicks": 'int64', "cost": 'float64'})
+                table_ref = self.dataset_ref.table(self.table_names[0])
+                data = self.bqClient.load_table_from_dataframe(dataframe, table_ref,location="US" )
+                data.result()
+                print("Data has been loaded on for, {} on {} at {}".format(platform,str(datetime.date.today()),datetime.datetime.now().strftime("%H:%M:%S")))
 
+            elif platform == 'Google Ads' and table == self.table_names[1]:
+                self.dataframe[platform].columns = schema
+                dataframe = self.dataframe[platform].astype(
+                    {"report_date": 'object', "campaign_name": 'object', "ad_group_name": 'object',
+                     "keyword": 'object', "network": 'object', "device": 'object',
+                     "impressions": 'int64', "clicks": 'int64', "cost": 'float64'})
+                table_ref = self.dataset_ref.table(self.table_names[1])
+                data = self.bqClient.load_table_from_dataframe(dataframe, table_ref,location="US")
+                data.result()
+                print("Data has been loaded on for, {} on {} at {}".format(platform,str(datetime.date.today()),datetime.datetime.now().strftime("%H:%M:%S")))
 
+            elif platform == 'Bing Ads' and table == self.table_names[2]:
+                self.dataframe[platform].columns = schema
+                dataframe = self.dataframe[platform].astype({"report_date": 'object', "campaign_name": 'object', "ad_group_name": 'object', "keyword": 'object', "device_type": 'object', "ad_distribution": 'object',"impressions": 'int64', "clicks": 'int64', "cost": 'float64'})
+                table_ref = self.dataset_ref.table(self.table_names[2])
+                data = self.bqClient.load_table_from_dataframe(dataframe, table_ref,location="US")
+                data.result()
+                print("Data has been loaded on for, {} on {} at {}".format(platform,str(datetime.date.today()),datetime.datetime.now().strftime("%H:%M:%S")))
 
-        for tables in table_list_ref:
-            for table,schema in tables_schema.items():
-                for platform,data in self.dataframe.items():
+            elif platform == 'GoogleAnalytics_Sessions' and table == self.table_names[3]:
+                self.dataframe[platform].columns = schema
+                dataframe = self.dataframe[platform].astype(
+                    {"report_date": 'object', "source": 'object', "medium": 'object', "campaign": 'object',
+                     "ad_content": 'object', "keyword": 'object', "channel_grouping": 'object', "device_category": 'object', "landing_page": 'object',
+                     "new_users": 'int64', "sessions": 'int64', "bounces": 'int64',
+                     "page_views": 'int64', "goal_7_completions": 'int64',"goal_8_completions": 'int64',"goal_9_completions": 'int64'})
+                table_ref = self.dataset_ref.table(self.table_names[3])
+                data = self.bqClient.load_table_from_dataframe(dataframe, table_ref,location="US")
+                data.result()
+                print("Data has been loaded on for, {} on {} at {}".format(platform,str(datetime.date.today()),datetime.datetime.now().strftime("%H:%M:%S")))
 
-                    if platform == 'Facebook Ads' and tables.table_id == self.table_names[0] and table == self.table_names[0]:
-                        self.dataframe[platform].columns = schema
-                        dataframe = self.dataframe[platform].astype(
-                            {"report_date": 'object', "campaign_name": 'object', "ad_set_name": 'object',
-                             "ad_name": 'object', "placement": 'object', "device_platform": 'object',
-                             "impressions": 'int64', "clicks": 'int64', "cost": 'float64'})
-                        table_ref = self.dataset_ref.table(self.table_names[0])
-                        data = self.bqClient.load_table_from_dataframe(dataframe, table_ref,location="US" )
-                        data.result()
-                        print("Data has been loaded on for, {}".format(platform))
+            elif platform == 'GoogleAnalytics_Pages' and table == self.table_names[4]:
+                self.dataframe[platform].columns = schema
+                dataframe = self.dataframe[platform].astype(
+                    {"report_date": 'object', "source": 'object', "medium": 'object', "campaign": 'object',
+                     "ad_content": 'object', "keyword": 'object', "channel_grouping": 'object',
+                     "device_category": 'object', "landing_page": 'object',
+                     "page_views": 'int64', "unique_page_views": 'int64', "entrances": 'int64',
+                     "exits": 'int64', "bounces": 'int64', "total_time_on_page": 'int64'})
+                table_ref = self.dataset_ref.table(self.table_names[4])
+                data = self.bqClient.load_table_from_dataframe(dataframe, table_ref,location="US")
+                data.result()
+                print("Data has been loaded on for, {} on {} at {}".format(platform, str(datetime.date.today()),datetime.datetime.now().strftime("%H:%M:%S")))
 
-                    elif platform == 'Google Ads' and tables.table_id == self.table_names[1] and table == self.table_names[1]:
-                        self.dataframe[platform].columns = schema
-                        dataframe = self.dataframe[platform].astype(
-                            {"report_date": 'object', "campaign_name": 'object', "ad_group_name": 'object',
-                             "keyword": 'object', "network": 'object', "device": 'object',
-                             "impressions": 'int64', "clicks": 'int64', "cost": 'float64'})
-                        table_ref = self.dataset_ref.table(self.table_names[1])
-                        data = self.bqClient.load_table_from_dataframe(dataframe, table_ref,location="US")
-                        data.result()
-                        print("Data has been loaded on for, {}".format(platform))
-
-                    elif platform == 'Bing Ads' and tables.table_id == self.table_names[2] and table == self.table_names[2]:
-                        self.dataframe[platform].columns = schema
-                        dataframe = self.dataframe[platform].astype({"report_date": 'object', "campaign_name": 'object', "ad_group_name": 'object', "keyword": 'object', "device_type": 'object', "ad_distribution": 'object',"impressions": 'int64', "clicks": 'int64', "cost": 'float64'})
-                        table_ref = self.dataset_ref.table(self.table_names[2])
-                        data = self.bqClient.load_table_from_dataframe(dataframe, table_ref,location="US")
-                        data.result()
-                        print("Data has been loaded on for, {}".format(platform))
-
-                    elif platform == 'GoogleAnalytics_Sessions' and tables.table_id == self.table_names[3] and table == self.table_names[3]:
-                        self.dataframe[platform].columns = schema
-                        dataframe = self.dataframe[platform].astype(
-                            {"report_date": 'object', "source": 'object', "medium": 'object', "campaign": 'object',
-                             "ad_content": 'object', "keyword": 'object', "channel_grouping": 'object', "device_category": 'object', "landing_page": 'object',
-                             "new_users": 'int64', "sessions": 'int64', "bounces": 'int64',
-                             "page_views": 'int64', "goal_7_completions": 'int64',"goal_8_completions": 'int64',"goal_9_completions": 'int64'})
-                        table_ref = self.dataset_ref.table(self.table_names[3])
-                        data = self.bqClient.load_table_from_dataframe(dataframe, table_ref,location="US")
-                        data.result()
-                        print("Data has been loaded on for, {}".format(platform))
-
-                    elif platform == 'GoogleAnalytics_Pages' and tables.table_id == self.table_names[4] and table == self.table_names[4]:
-                        self.dataframe[platform].columns = schema
-                        dataframe = self.dataframe[platform].astype(
-                            {"report_date": 'object', "source": 'object', "medium": 'object', "campaign": 'object',
-                             "ad_content": 'object', "keyword": 'object', "channel_grouping": 'object',
-                             "device_category": 'object', "landing_page": 'object',
-                             "page_views": 'int64', "unique_page_views": 'int64', "entrances": 'int64',
-                             "exits": 'int64', "bounces": 'int64', "total_time_on_page": 'int64'})
-                        table_ref = self.dataset_ref.table(self.table_names[4])
-                        data = self.bqClient.load_table_from_dataframe(dataframe, table_ref,location="US")
-                        data.result()
-                        print("Data has been loaded on for, {}".format(platform))
+    def deleteData(self,table_name):
 
 
+        table_ref = self.dataset_ref.table(table_name)
+        table = self.bqClient.get_table(table_ref)
+        row_count = table.num_rows
+
+        if row_count > 0:
+            query = 'DELETE FROM {}.{} WHERE true'.format(self.datasets[0].dataset_id,table_name)
+
+            client = self.bqClient.query(query)
+            client.result()
+            print("Data on {}.{} was deleted on {} at {}".format(self.datasets[0].dataset_id,table_name,str(datetime.date.today()),datetime.datetime.now().strftime("%H:%M:%S")))
+        else:
+            print("No rows to delete on {}.{}".format(self.datasets[0].dataset_id,table_name))
 
 
 
@@ -193,5 +200,12 @@ class bigQuery:
 
 
 
-x = bigQuery("psd-data-warehouse").loadData()
+
+
+
+
+
+
+# y = bigQuery("psd-data-warehouse").getSchema()
+# x = bigQuery("psd-data-warehouse").deleteData(y)
 # print(x)
